@@ -12,6 +12,7 @@ public class OrderItemService {
 
     private final ProductRepository productRepository;
 
+    //TODO przykłąd z mockiem do treningu
     public OrderItem convert(CreateOrderDto.ProductDto productDto) {
         OrderItem orderItem = new OrderItem();
         orderItem.setQuantity(productDto.getQuantity());

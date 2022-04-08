@@ -21,6 +21,7 @@ public class OrderService {
     @Transactional
     public void save(List<CreateOrderDto> createOrderList) {
         createOrderList.stream()
+                //TODO walidacja
                 .map(this::mapFromDto)
                 .forEach(orderRepository::save);
     }
