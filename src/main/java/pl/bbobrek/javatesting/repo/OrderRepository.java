@@ -9,6 +9,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByActiveIsTrue();
 
-    //TODO dodanie przypadkow testowych
-
 }

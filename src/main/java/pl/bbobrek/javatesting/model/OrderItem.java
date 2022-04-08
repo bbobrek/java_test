@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -24,5 +25,9 @@ public class OrderItem {
 
     @ManyToOne
     private Order order;
+
+    public BigDecimal getAmount() {
+        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
 
 }

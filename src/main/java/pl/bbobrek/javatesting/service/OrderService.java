@@ -8,7 +8,9 @@ import pl.bbobrek.javatesting.model.OrderItem;
 import pl.bbobrek.javatesting.model.dto.CreateOrderDto;
 import pl.bbobrek.javatesting.repo.OrderRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,9 +23,26 @@ public class OrderService {
     @Transactional
     public void save(List<CreateOrderDto> createOrderList) {
         createOrderList.stream()
-                //TODO walidacja
-                .map(this::mapFromDto)
+                .map(this::convertToOrder)
+                .filter(Objects::nonNull)
                 .forEach(orderRepository::save);
+    }
+
+    /**
+     *
+     * Do napisania metoda sprawdzająca zamiane obiektu createOrderDto na obiekt Order.
+     * Na co trzeba zwrocic uwage?
+     * - bedzie mock orderItemService
+     * - trzeba tak napisać dane testowe do tego przypadku, żeby przetestować też obliczanie totalAmount
+     * - kod do sprawdzenia czy totalAmount policzony jest odpowiedni podanemy assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(157.5)));
+     * tylko zamiast 157.5 podaj swoja liczbe ktora oczekujesz
+     *
+     * */
+    public Order convertToOrder(CreateOrderDto createOrderDto) {
+        if (CreateOrderValidation.validateCreateOrderDto(createOrderDto)) {
+            return mapFromDto(createOrderDto);
+        }
+        return null;
     }
 
     private Order mapFromDto(CreateOrderDto createOrderDto) {
@@ -31,6 +50,10 @@ public class OrderService {
         List<OrderItem> orderItems = getOrderItems(createOrderDto.getProducts());
         order.setOrderItems(orderItems);
         order.setOrderNumber(GenerateOrderNumber.generate(orderItems));
+        BigDecimal totalAmount = orderItems.stream()
+                .map(OrderItem::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setTotalAmount(totalAmount);
         return order;
     }
 
