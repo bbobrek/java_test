@@ -23,5 +23,7 @@ public class Order {
     private boolean active = true;
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "order")
     private List<OrderItem> orderItems;
+    private String deliveryMethod;
+    private String address;
 
 }

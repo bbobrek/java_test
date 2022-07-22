@@ -7,6 +7,9 @@ import pl.bbobrek.javatesting.model.Order;
 import pl.bbobrek.javatesting.model.OrderItem;
 import pl.bbobrek.javatesting.model.dto.CreateOrderDto;
 import pl.bbobrek.javatesting.repo.OrderRepository;
+import pl.bbobrek.javatesting.service.devliery.DHLDelivery;
+import pl.bbobrek.javatesting.service.devliery.DPDDelivery;
+import pl.bbobrek.javatesting.service.devliery.DeliveryFabric;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,12 +23,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemService orderItemService;
 
+    private final DeliveryFabric deliveryFabric;
+
     @Transactional
     public void save(List<CreateOrderDto> createOrderList) {
         createOrderList.stream()
                 .map(this::convertToOrder)
                 .filter(Objects::nonNull)
-                .forEach(orderRepository::save);
+                .forEach(o -> {
+                    orderRepository.save(o);
+                    deliveryFabric.getBasedOnDeliveryMethod(o.getDeliveryMethod())
+                            .createDelivery(o.getAddress());
+                });
     }
 
     /**
@@ -49,7 +58,7 @@ public class OrderService {
         Order order = new Order();
         List<OrderItem> orderItems = getOrderItems(createOrderDto.getProducts());
         order.setOrderItems(orderItems);
-        order.setOrderNumber(GenerateOrderNumber.generate(orderItems));
+        //order.setOrderNumber(GenerateOrderNumber.generate(orderItems));
         BigDecimal totalAmount = orderItems.stream()
                 .map(OrderItem::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
